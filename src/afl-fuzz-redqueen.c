@@ -99,6 +99,8 @@ static struct range *add_range(struct range *ranges, u32 start, u32 end) {
 
 }
 
+u64 car[20];
+
 static struct range *pop_biggest_range(struct range **ranges) {
 
   struct range *r = *ranges;
@@ -917,6 +919,7 @@ static u8 cmp_extend_encoding(afl_state_t *afl, struct cmp_header *h,
 
       }
 
+car[0]++;
       if (unlikely(its_fuzz(afl, new_buf, len, status))) { return 1; }
 
     }
@@ -1167,6 +1170,7 @@ static u8 cmp_extend_encoding(afl_state_t *afl, struct cmp_header *h,
 
         u64 tmp_64 = *buf_64;
         *buf_64 = repl;
+car[1]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 #ifdef CMPLOG_COMBINE
         if (*status == 1) { memcpy(cbuf + idx, buf_64, 8); }
@@ -1208,6 +1212,7 @@ static u8 cmp_extend_encoding(afl_state_t *afl, struct cmp_header *h,
 
         u32 tmp_32 = *buf_32;
         *buf_32 = (u32)repl;
+car[2]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 #ifdef CMPLOG_COMBINE
         if (*status == 1) { memcpy(cbuf + idx, buf_32, 4); }
@@ -1242,6 +1247,7 @@ static u8 cmp_extend_encoding(afl_state_t *afl, struct cmp_header *h,
 
         u16 tmp_16 = *buf_16;
         *buf_16 = (u16)repl;
+car[3]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 #ifdef CMPLOG_COMBINE
         if (*status == 1) { memcpy(cbuf + idx, buf_16, 2); }
@@ -1280,6 +1286,7 @@ static u8 cmp_extend_encoding(afl_state_t *afl, struct cmp_header *h,
 
         u8 tmp_8 = *buf_8;
         *buf_8 = (u8)repl;
+car[4]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 #ifdef CMPLOG_COMBINE
         if (*status == 1) { cbuf[idx] = *buf_8; }
@@ -1385,6 +1392,7 @@ static u8 cmp_extend_encoding(afl_state_t *afl, struct cmp_header *h,
           memcpy(tmpbuf, buf + idx, ilen);
           memcpy(buf + idx, (char *)&new_vall, ilen);
 
+car[5]++;
           if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
   #ifdef CMPLOG_COMBINE
           if (*status == 1) { memcpy(cbuf + idx, (char *)&new_vall, ilen); }
@@ -1409,6 +1417,7 @@ static u8 cmp_extend_encoding(afl_state_t *afl, struct cmp_header *h,
         memcpy(tmpbuf, buf + idx, ilen);
         memcpy(buf + idx, (char *)&new_val, ilen);
 
+car[6]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 #ifdef CMPLOG_COMBINE
         if (*status == 1) { memcpy(cbuf + idx, (char *)&new_val, ilen); }
@@ -1658,6 +1667,7 @@ static u8 cmp_extend_encodingN(afl_state_t *afl, struct cmp_header *h,
       memcpy(backup, ptr, hshape);
       memcpy(ptr, r + off, hshape);
 
+car[7]++;
       if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 
   #ifdef CMPLOG_COMBINE
@@ -1748,6 +1758,7 @@ static u8 cmp_extend_encodingN(afl_state_t *afl, struct cmp_header *h,
         memcpy(tmpbuf, buf + idx, ilen);
         memcpy(buf + idx, (char *)&new_val, ilen);
 
+car[8]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
   #ifdef CMPLOG_COMBINE
         if (*status == 1) { memcpy(cbuf + idx, (char *)&new_val, ilen); }
@@ -2304,6 +2315,7 @@ static u8 rtn_extend_encoding(afl_state_t *afl, u8 entry,
 
         buf[idx + i] = repl[i];
 
+car[9]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 
 #ifdef CMPLOG_COMBINE
@@ -2505,6 +2517,7 @@ static u8 rtn_extend_encoding(afl_state_t *afl, u8 entry,
             if (res + saved_idx < len) {
 
               memcpy(buf + idx, tmp, res);
+car[10]++;
               if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
               // fprintf(stderr, "RTN ATTEMPT FROMB64 idx=%u fromb64 %u %s %s
               // result %u\n",       saved_idx,      fromb64,      tmp, repl,
@@ -2521,6 +2534,7 @@ static u8 rtn_extend_encoding(afl_state_t *afl, u8 entry,
 
           u32 olen = from_base64(repl, tmp, i + 1);
           memcpy(buf + idx, tmp, olen);
+car[11]++;
           if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
           // fprintf(stderr, "RTN ATTEMPT tob64 %u idx=%u result %u\n", tob64,
           // idx, *status);
@@ -2548,6 +2562,7 @@ static u8 rtn_extend_encoding(afl_state_t *afl, u8 entry,
                    hex_table[repl[off + (j << 1) + 1] - '0'];
 
         memcpy(buf + idx, tmp, i + 1);
+car[12]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
         // fprintf(stderr, "RTN ATTEMPT tohex %u result %u\n", tohex,
         // *status);
@@ -2614,6 +2629,7 @@ static u8 rtn_extend_encoding(afl_state_t *afl, u8 entry,
           }
 
           memcpy(buf + idx, tmp, hlen + 1 + off);
+car[13]++;
           if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
           tmp[hlen + 1 + off] = 0;
           // fprintf(stderr, "RTN ATTEMPT idx=%u len=%u fromhex %u %s %s result
@@ -2628,6 +2644,7 @@ static u8 rtn_extend_encoding(afl_state_t *afl, u8 entry,
 
         for (j = 0; j <= i; j++)
           buf[idx + j] = repl[j] ^ xor_val[j];
+car[14]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
         // fprintf(stderr, "RTN ATTEMPT xor %u result %u\n", xor, *status);
 
@@ -2637,6 +2654,7 @@ static u8 rtn_extend_encoding(afl_state_t *afl, u8 entry,
 
         for (j = 0; j <= i; j++)
           buf[idx + j] = repl[j] - arith_val[j];
+car[15]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
         // fprintf(stderr, "RTN ATTEMPT arith %u result %u\n", arith,
         // *status);
@@ -2647,6 +2665,7 @@ static u8 rtn_extend_encoding(afl_state_t *afl, u8 entry,
 
         for (j = 0; j <= i; j++)
           buf[idx + j] = repl[j] | 0x20;
+car[16]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
         // fprintf(stderr, "RTN ATTEMPT toupper %u result %u\n", toupper,
         // *status);
@@ -2657,6 +2676,7 @@ static u8 rtn_extend_encoding(afl_state_t *afl, u8 entry,
 
         for (j = 0; j <= i; j++)
           buf[idx + j] = repl[j] & 0x5f;
+car[17]++;
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
         // fprintf(stderr, "RTN ATTEMPT tolower %u result %u\n", tolower,
         // *status);
@@ -2894,6 +2914,8 @@ static u8 rtn_fuzz(afl_state_t *afl, u32 key, u8 *orig_buf, u8 *buf, u8 *cbuf,
 
 // afl->queue_cur->exec_cksum
 u8 input_to_state_stage(afl_state_t *afl, u8 *orig_buf, u8 *buf, u32 len) {
+
+  memset((char*)car, 0, sizeof(car));
 
   u8 r = 1;
   if (unlikely(!afl->pass_stats)) {
@@ -3148,6 +3170,7 @@ exit_its:
     memcpy(afl->virgin_bits, virgin_backup, afl->shm.map_size);
 
     u8 status = 0;
+car[18]++;
     its_fuzz(afl, cbuf, len, &status);
 
   // now combine with the saved virgin bits
@@ -3223,6 +3246,11 @@ exit_its:
   }
 
 #endif
+
+  fprintf(stderr, "DEBUG CAR:");
+  for (u32 w = 0; w < 20; w++)
+    if (car[w]) fprintf(stderr, " %u=%llu", w, car[w]);
+  fprintf(stderr, "\n");
 
   return r;
 
