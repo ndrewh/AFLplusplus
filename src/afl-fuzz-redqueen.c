@@ -797,7 +797,7 @@ static u8 cmp_extend_encoding(afl_state_t *afl, struct cmp_header *h,
   u64 *o_buf_64 = (u64 *)&orig_buf[idx];
   u32 *o_buf_32 = (u32 *)&orig_buf[idx];
   u16 *o_buf_16 = (u16 *)&orig_buf[idx];
-  u8  *o_buf_8 = &orig_buf[idx];
+  //u8  *o_buf_8 = &orig_buf[idx];
 
   u32 its_len = MIN(len - idx, taint_len);
 
@@ -1297,9 +1297,9 @@ car[4]++; // 62%
       }
 
     }
+*/
 
   }
-*/
 
   // If 'S' is set for cmplog mode then we try a scale encoding of the value.
   // Currently we can only handle bytes up to 1 << 55 on 32 bit and 1 << 119
