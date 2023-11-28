@@ -1212,7 +1212,7 @@ car[1]++;
 
         u32 tmp_32 = *buf_32;
         *buf_32 = (u32)repl;
-car[2]++;
+car[2]++; // 10%
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 #ifdef CMPLOG_COMBINE
         if (*status == 1) { memcpy(cbuf + idx, buf_32, 4); }
@@ -1247,7 +1247,7 @@ car[2]++;
 
         u16 tmp_16 = *buf_16;
         *buf_16 = (u16)repl;
-car[3]++;
+car[3]++; // 27%
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 #ifdef CMPLOG_COMBINE
         if (*status == 1) { memcpy(cbuf + idx, buf_16, 2); }
@@ -1272,6 +1272,7 @@ car[3]++;
 
     }
 
+/*
     if (*status != 1) {  // u8
 
       // if (its_len >= 1)
@@ -1286,7 +1287,7 @@ car[3]++;
 
         u8 tmp_8 = *buf_8;
         *buf_8 = (u8)repl;
-car[4]++;
+car[4]++; // 62%
         if (unlikely(its_fuzz(afl, buf, len, status))) { return 1; }
 #ifdef CMPLOG_COMBINE
         if (*status == 1) { cbuf[idx] = *buf_8; }
@@ -1298,6 +1299,7 @@ car[4]++;
     }
 
   }
+*/
 
   // If 'S' is set for cmplog mode then we try a scale encoding of the value.
   // Currently we can only handle bytes up to 1 << 55 on 32 bit and 1 << 119
