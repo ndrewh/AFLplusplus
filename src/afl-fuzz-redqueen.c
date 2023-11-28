@@ -1388,7 +1388,7 @@ car[4]++; // 62%
         new_vall += (scale_len << 2) + 3;
         ilen = scale_len + 5;
 
-        if (ilen <= its_len) {
+        if (ilen <= its_len && ilen > 1) {
 
           u8 tmpbuf[32];
           memcpy(tmpbuf, buf + idx, ilen);
@@ -1413,7 +1413,7 @@ car[5]++;
 
     if (do_call) {
 
-      if (ilen <= its_len) {
+      if (ilen <= its_len && ilen > 1) {
 
         u8 tmpbuf[32];
         memcpy(tmpbuf, buf + idx, ilen);
