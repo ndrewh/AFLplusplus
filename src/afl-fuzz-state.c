@@ -104,6 +104,7 @@ void afl_state_init(afl_state_t *afl, uint32_t map_size) {
   afl->stats_avg_exec = 0;
   afl->skip_deterministic = 1;
   afl->sync_time = SYNC_TIME;
+  afl->sync_optimistic = 0;
   afl->cmplog_lvl = 2;
   afl->min_length = 1;
   afl->max_length = MAX_FILE;
@@ -592,6 +593,21 @@ void read_afl_environment(afl_state_t *afl, char **envp) {
                   "incorrect value for AFL_SYNC_TIME environment variable, "
                   "used default value %lld instead.",
                   afl->sync_time / 60 / 1000);
+
+            }
+          } else if (!strncmp(env, "AFL_SYNC_OPTIMISTIC",
+
+                              afl_environment_variable_len)) {
+
+            int optimistic = atoi((u8 *)get_afl_env(afl_environment_variables[i]));
+            if (optimistic > 0) {
+                afl->sync_optimistic = 1;
+            } else {
+
+              WARNF(
+                  "incorrect value for AFL_SYNC_OPTIMISTIC environment variable, "
+                  "used default value %lld instead.",
+                  0);
 
             }
 

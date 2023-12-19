@@ -453,7 +453,7 @@ void write_crash_readme(afl_state_t *afl) {
    entry is saved, 0 otherwise. */
 
 u8 __attribute__((hot))
-save_if_interesting(afl_state_t *afl, void *mem, u32 len, u8 fault) {
+save_if_interesting(afl_state_t *afl, void *mem, u32 len, u8 fault, u8 is_sync) {
 
   if (unlikely(len == 0)) { return 0; }
 
@@ -516,7 +516,7 @@ save_if_interesting(afl_state_t *afl, void *mem, u32 len, u8 fault) {
 
     }
 
-    if (likely(!new_bits)) {
+    if (likely(!new_bits) && likely(!is_sync)) {
 
       if (unlikely(afl->crash_mode)) { ++afl->total_crashes; }
       return 0;
