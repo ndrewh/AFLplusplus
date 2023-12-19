@@ -1728,6 +1728,7 @@ afl_fsrv_write_to_testcase(afl_forkserver_t *fsrv, u8 *buf, size_t len) {
 
     *fsrv->shmem_fuzz_len = len;
     memcpy(fsrv->shmem_fuzz, buf, len);
+    *(u32*)(fsrv->shmem_fuzz + len) = 0;
 #ifdef _DEBUG
     if (getenv("AFL_DEBUG")) {
 

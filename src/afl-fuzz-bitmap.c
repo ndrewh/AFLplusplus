@@ -453,7 +453,7 @@ void write_crash_readme(afl_state_t *afl) {
    entry is saved, 0 otherwise. */
 
 u8 __attribute__((hot))
-save_if_interesting(afl_state_t *afl, void *mem, u32 len, u8 fault) {
+save_if_interesting(afl_state_t *afl, void *mem, u32 len, u8 fault, u8 is_pydafuzz_sync) {
 
   if (unlikely(len == 0)) { return 0; }
 
@@ -475,7 +475,7 @@ save_if_interesting(afl_state_t *afl, void *mem, u32 len, u8 fault) {
   }
 
   u8  fn[PATH_MAX];
-  u8 *queue_fn = "";
+  u8 *queue_fn = "", *meta1_fn = "", *meta2_fn = "";
   u8  new_bits = 0, keeping = 0, res, classified = 0, is_timeout = 0,
      need_hash = 1;
   s32 fd;
@@ -516,7 +516,7 @@ save_if_interesting(afl_state_t *afl, void *mem, u32 len, u8 fault) {
 
     }
 
-    if (likely(!new_bits)) {
+    if (likely(!new_bits) && (likely(!is_pydafuzz_sync) || likely(strcmp(afl->syncing_party, "pyda")))) {
 
       if (unlikely(afl->crash_mode)) { ++afl->total_crashes; }
       return 0;
@@ -560,6 +560,28 @@ save_if_interesting(afl_state_t *afl, void *mem, u32 len, u8 fault) {
       ck_write(fd, mem, len, queue_fn);
       close(fd);
 
+    }
+
+    if (unlikely(afl->pyda_fuzz) && afl->queue_cur) {
+      // We need to copy the metadata file into the metadata dir
+      meta2_fn = alloc_printf(
+          "%s/meta/id:%06u", afl->out_dir, afl->queued_items);
+      if (!is_pydafuzz_sync) {
+        // The metadata file should match the current queue top, if one exists
+        meta1_fn = alloc_printf(
+            "%s/meta/id:%06u", afl->out_dir, afl->queue_cur->id);
+        if (!access(meta1_fn, R_OK)) {
+          link_or_copy(meta1_fn, meta2_fn);
+        }
+        ck_free(meta1_fn);
+      } else if (!strcmp(afl->syncing_party, "pyda")) {
+        // The metadata file should already exist in the sync dir
+        meta1_fn = alloc_printf(
+            "%s/%s/meta/id:%06u", afl->sync_dir, afl->syncing_party, afl->syncing_case);
+        link_or_copy(meta1_fn, meta2_fn);
+        ck_free(meta1_fn);
+      }
+      ck_free(meta2_fn);
     }
 
     add_to_queue(afl, queue_fn, len, 0);

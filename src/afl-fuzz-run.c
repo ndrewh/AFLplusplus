@@ -214,6 +214,12 @@ write_to_testcase(afl_state_t *afl, void **mem, u32 len, u32 fix) {
     /* boring uncustom. */
     afl_fsrv_write_to_testcase(&afl->fsrv, *mem, len);
 
+    if (likely(afl->pyda_fuzz) && likely(afl->fsrv.use_shmem_fuzz)) {
+      // Write the ID at the end of the shmem
+      u32 id = afl->queue_cur ? afl->queue_cur->id : 0;
+      *(u32*)(afl->fsrv.shmem_fuzz + len) = id;
+    }
+
   }
 
 #ifdef _AFL_DOCUMENT_MUTATIONS
@@ -835,7 +841,7 @@ void sync_fuzzers(afl_state_t *afl) {
         if (afl->stop_soon) { goto close_sync; }
 
         afl->syncing_party = sd_ent->d_name;
-        afl->queued_imported += save_if_interesting(afl, mem, new_len, fault);
+        afl->queued_imported += save_if_interesting(afl, mem, new_len, fault, afl->pyda_fuzz);
         show_stats(afl);
         afl->syncing_party = 0;
 
@@ -1185,7 +1191,7 @@ common_fuzz_stuff(afl_state_t *afl, u8 *out_buf, u32 len) {
 
   /* This handles FAULT_ERROR for us: */
 
-  afl->queued_discovered += save_if_interesting(afl, out_buf, len, fault);
+  afl->queued_discovered += save_if_interesting(afl, out_buf, len, fault, 0);
 
   if (!(afl->stage_cur % afl->stats_update_freq) ||
       afl->stage_cur + 1 == afl->stage_max) {
